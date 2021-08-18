@@ -8,7 +8,7 @@ const toast = createStandaloneToast({ theme });
 
 export function queryErrorHandler(error: unknown): void {
   // error is type unknown because in js, anything can be an error (e.g. throw(5))
-  const id = 'react-query-error';
+  const id = `react-query-error-${Math.random().toString(36).substr(2, 9)}`; // id is used as key, needs to be unique
 
   const title =
     error instanceof Error
