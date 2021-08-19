@@ -1,8 +1,8 @@
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
 // for storing current month / year details
 export interface MonthYear {
-  startDate: dayjs.Dayjs; // first day of the month
+  startDate: Dayjs; // first day of the month
   firstDOW: number; // day of week; 0 === Sunday
   lastDate: number; // last date of the month
   monthName: string; // name of the month
@@ -14,13 +14,13 @@ export interface MonthYear {
 export function getUpdatedMonthYear(
   monthYear: MonthYear,
   monthIncrement: number,
-): dayjs.Dayjs {
+): Dayjs {
   // the clone is necessary to prevent mutation
   return monthYear.startDate.clone().add(monthIncrement, 'months');
 }
 
 // get calendar-relevant data for the month containing initialDate
-export function getMonthYearDetails(initialDate: dayjs.Dayjs): MonthYear {
+export function getMonthYearDetails(initialDate: Dayjs): MonthYear {
   const month = initialDate.format('MM');
   const year = initialDate.format('YYYY');
   const startDate = dayjs(`${year}${month}01`);

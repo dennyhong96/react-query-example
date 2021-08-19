@@ -1,3 +1,3 @@
 import type { Appointment } from '../../../../shared/types';
 
-export type AppointmentDateMap = Record<number, Appointment[]>;
+export type AppointmentDateMap = Record<number, Appointment[]>; // { dayOfTheMonth: listOfApptsOfThatDay }

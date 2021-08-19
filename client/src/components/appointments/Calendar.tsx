@@ -35,14 +35,17 @@ export function Calendar(): ReactElement {
           icon={<TiArrowLeftThick />}
           isDisabled={monthYear.startDate < currentDate}
         />
+
         <Heading minW="40%" textAlign="center">
           {monthYear.monthName} {monthYear.year}
         </Heading>
+
         <IconButton
           aria-label="next month"
           onClick={() => updateMonthYear(1)}
           icon={<TiArrowRightThick />}
         />
+
         <Checkbox
           variant="flushed"
           width="48"
@@ -55,6 +58,7 @@ export function Calendar(): ReactElement {
           Only show available
         </Checkbox>
       </HStack>
+
       <Grid templateColumns="repeat(7, 1fr)" gap={4} my={5} mx={10}>
         {/* first day needs a grid column */}
         <DateBox
@@ -62,6 +66,7 @@ export function Calendar(): ReactElement {
           gridColumn={monthYear.firstDOW + 1}
           appointments={appointments[1]}
         />
+
         {/* the rest of the days will follow */}
         {[...Array(monthYear.lastDate)].map((_, i) =>
           i > 0 ? (
@@ -69,6 +74,7 @@ export function Calendar(): ReactElement {
           ) : null,
         )}
       </Grid>
+
       <UserAppointments />
     </Box>
   );
