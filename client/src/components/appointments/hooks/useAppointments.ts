@@ -82,6 +82,11 @@ export function useAppointments(): UseAppointments {
     [showAll, user],
   );
 
+  const commonQueryOptions = {
+    staleTime: 0,
+    cacheTime: 5 * 60 * 1000,
+  };
+
   const { data = {} } = useQuery(
     [queryKeys.appointments, monthYear.year, monthYear.month],
     () => getAppointments(monthYear.year, monthYear.month),
@@ -90,12 +95,23 @@ export function useAppointments(): UseAppointments {
 
       select: selectAppointments,
 
+      // Overwrite queryClient global refech options
+      ...commonQueryOptions,
+      retryOnMount: true,
+      refetchOnReconnect: true,
+      refetchOnWindowFocus: true,
+
+      // Turn on pooling, refetch every minute in the background
+      refetchInterval: 60 * 1000,
+
+      // Prefetch next month's appointments
       onSettled() {
         // Could also use useEffect for prefetch, with monthYear as dependency
         const nextMonthYear = getNewMonthYear(monthYear, 1);
         queryClient.prefetchQuery(
           [queryKeys.appointments, nextMonthYear.year, nextMonthYear.month],
           () => getAppointments(nextMonthYear.year, nextMonthYear.month),
+          commonQueryOptions,
         );
       },
     },
