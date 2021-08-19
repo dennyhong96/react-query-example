@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import { useQuery } from 'react-query';
 
 import type { Staff } from '../../../../../shared/types';
@@ -21,13 +21,21 @@ export function useStaff(): UseStaff {
   // for filtering staff by treatment
   const [filter, setFilter] = useState('all');
 
-  const { data = [] } = useQuery([queryKeys.staff], getStaff);
+  const selectStaff = useCallback(
+    (allStaff) => {
+      if (filter === 'all') return allStaff;
+      return filterByTreatment(allStaff, filter);
+    },
+    [filter],
+  );
+
+  // Need to wrap in useCallback because react-query does a === comparasion on the select function
+  const { data: staff = [] } = useQuery([queryKeys.staff], getStaff, {
+    select: selectStaff,
+  });
 
   return {
-    staff: useMemo(
-      () => (filter === 'all' ? data : filterByTreatment(data, filter)),
-      [data, filter],
-    ),
+    staff,
     filter,
     setFilter,
   };

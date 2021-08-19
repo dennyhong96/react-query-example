@@ -1,6 +1,6 @@
 // @ts-nocheck
 import dayjs from 'dayjs';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 
 import { axiosInstance } from '../../../axiosInstance';
@@ -73,11 +73,23 @@ export function useAppointments(): UseAppointments {
   //       monthYear.month
   const queryClient = useQueryClient();
 
+  // Need to wrap in useCallback because react-query does a === comparasion on the select function
+  const selectAppointments = useCallback(
+    (allAppointments) => {
+      if (showAll) return allAppointments;
+      return getAvailableAppointments(allAppointments, user);
+    },
+    [showAll, user],
+  );
+
   const { data = {} } = useQuery(
     [queryKeys.appointments, monthYear.year, monthYear.month],
     () => getAppointments(monthYear.year, monthYear.month),
     {
       // keepPreviousData: true,
+
+      select: selectAppointments,
+
       onSettled() {
         // Could also use useEffect for prefetch, with monthYear as dependency
         const nextMonthYear = getNewMonthYear(monthYear, 1);
