@@ -22,7 +22,7 @@ export function useUserAppointments(): Appointment[] {
   let userAppointments: Appointment[] = [];
 
   ({ data: userAppointments = [] } = useQuery(
-    'user-appointments',
+    [queryKeys.appointments, queryKeys.user, user.id], // Have the same prefix as useAppointments, so they can be invalidated at once
     () => getUserAppointments(user),
     { enabled: !!user },
   ));

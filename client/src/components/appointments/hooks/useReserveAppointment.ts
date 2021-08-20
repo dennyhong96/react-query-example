@@ -1,4 +1,4 @@
-import { UseMutateFunction, useMutation } from 'react-query';
+import { UseMutateFunction, useMutation, useQueryClient } from 'react-query';
 
 import { Appointment } from '../../../../../shared/types';
 import { axiosInstance } from '../../../axiosInstance';
@@ -26,11 +26,23 @@ type AppointmentMutationFunction = UseMutateFunction<
 >;
 
 export function useReserveAppointment(): AppointmentMutationFunction {
+  const queryClient = useQueryClient();
+
   const { user } = useUser();
   const toast = useCustomToast();
 
-  const { mutate } = useMutation((appointment: Appointment) =>
-    setAppointmentUser(appointment, user.id),
+  const { mutate } = useMutation(
+    (appointment: Appointment) => setAppointmentUser(appointment, user.id),
+    {
+      // Trigger a refetch of appointments
+      onSuccess() {
+        queryClient.invalidateQueries([queryKeys.appointments]); // Invalidate all appointments with 'appointments' key prefix
+        toast({
+          title: 'You have reserved this appointment!',
+          status: 'warning',
+        });
+      },
+    },
   );
 
   return mutate;
