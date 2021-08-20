@@ -10,6 +10,7 @@ export function queryErrorHandler(error: unknown): void {
   // error is type unknown because in js, anything can be an error (e.g. throw(5))
   const id = `react-query-error-${Math.random().toString(36).substr(2, 9)}`; // id is used as key, needs to be unique
 
+  // error in JS can come from any throw statement, not just Error instances
   const title =
     error instanceof Error
       ? // remove the initial 'Error: ' that accompanies many errors
@@ -38,6 +39,12 @@ export const queryClient = new QueryClient({
         queryErrorHandler(error);
       },
       // useErrorBoundary - Set this to true to throw errors in the render phase and propagated to the nearest error boundary
+    },
+
+    mutations: {
+      onError(error) {
+        queryErrorHandler(error);
+      },
     },
   },
 });
