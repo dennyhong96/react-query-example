@@ -39,7 +39,7 @@ export function useReserveAppointment(): AppointmentMutationFunction {
         queryClient.invalidateQueries([queryKeys.appointments]); // Invalidate all appointments with 'appointments' key prefix
         toast({
           title: 'You have reserved this appointment!',
-          status: 'warning',
+          status: 'success',
         });
       },
     },

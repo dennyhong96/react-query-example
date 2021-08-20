@@ -1,8 +1,9 @@
 import jsonpatch from 'fast-json-patch';
-import { UseMutateFunction, useMutation } from 'react-query';
+import { UseMutateFunction, useMutation, useQueryClient } from 'react-query';
 
 import type { User } from '../../../../../shared/types';
 import { axiosInstance, getJWTHeader } from '../../../axiosInstance';
+import { queryKeys } from '../../../react-query/constants';
 import { useCustomToast } from '../../app/hooks/useCustomToast';
 import { useUser } from './useUser';
 
@@ -31,21 +32,48 @@ export function usePatchUser(): UseMutateFunction<
   User,
   unknown
 > {
+  const queryClient = useQueryClient();
   const { user, updateUser } = useUser();
   const toast = useCustomToast();
 
   const { mutate } = useMutation(
     (newUser: User) => patchUserOnServer(newUser, user),
     {
-      onSuccess(patchedUser) {
-        console.log({ patchedUser });
+      onMutate(newUser: User) {
+        // Cancel any outgoing user query in progress, so old server data don't overwrite optimistic update
+        queryClient.cancelQueries(queryKeys.user);
 
-        updateUser(patchedUser);
+        // take a snapshot of previous cache
+        const prevUserData: User = queryClient.getQueryData(queryKeys.user);
 
+        // optimistically update cache
+        updateUser(newUser);
+
+        // return context object with old snapshotted cache
+        return { prevUserData };
+      },
+      onError(error, newData, context: { prevUserData: User }) {
+        // Roll back to previous saved user, discard the optimistic update
+        if (!context) return;
+        updateUser(context.prevUserData);
+
+        // tell user why it reverted back to old value
+        toast({
+          title: 'Update failed. Restoring to previous value.',
+          status: 'warning',
+        });
+      },
+      onSuccess(userData: User | null) {
+        if (!userData) return;
+        // user is already updated
         toast({
           title: 'Your profile is successfully updated.',
           status: 'success',
         });
+      },
+      onSettled() {
+        // Invalidate user query to make sure we are in sync with server data
+        queryClient.invalidateQueries(queryKeys.user);
       },
     },
   );

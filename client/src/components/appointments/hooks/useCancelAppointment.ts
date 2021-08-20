@@ -27,7 +27,7 @@ export function useCancelAppointment(): UseMutateFunction<
       queryClient.invalidateQueries([queryKeys.appointments]);
       toast({
         title: 'You have removed this appointment.',
-        status: 'success',
+        status: 'warning',
       });
     },
   });
