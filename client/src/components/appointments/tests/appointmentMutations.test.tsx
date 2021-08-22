@@ -2,6 +2,7 @@ import userEvent from '@testing-library/user-event';
 
 import { mockUser } from '../../../mocks/mockData';
 import { render, screen, waitForElementToBeRemoved } from '../../../test-utils';
+import { UserProfile } from '../../user/UserProfile';
 import { Calendar } from '../Calendar';
 
 // mocking useUser to mimic a logged-in user
@@ -34,9 +35,19 @@ test('Reserve appointment', async () => {
 });
 
 test('Cancel appointment', async () => {
-  // your test here
-  //
-  // const cancelButtons = await screen.findAllByRole('button', {
-  //   name: /cancel appointment/i,
-  //  });
+  render(<UserProfile />);
+
+  const cancelButtons = await screen.findAllByRole('button', {
+    name: 'cancel appointment',
+  });
+
+  userEvent.click(cancelButtons[0]);
+
+  const toast = await screen.findByRole('alert');
+  expect(toast).toHaveTextContent('removed');
+
+  const closeToastButton = screen.getByRole('button', { name: 'Close' });
+  closeToastButton.click();
+
+  await waitForElementToBeRemoved(toast);
 });
