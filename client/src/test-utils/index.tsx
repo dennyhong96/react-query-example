@@ -1,17 +1,17 @@
 /* eslint-disable no-console */
 import { render, RenderResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import { ReactElement } from 'react';
 import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { generateQueryClient } from '../react-query/queryClient';
-// import { defaultQueryClientOptions } from '../react-query/queryClient';
 
 setLogger({
   log: console.log,
   warn: console.warn,
   error: () => {
-    // swallow error
+    // swallow error in test
   },
 });
 
@@ -24,13 +24,14 @@ export const generateTestQueryClient = (): QueryClient => {
   return client;
 };
 
-export const renderWithQueryClient = (
+export const customRender = (
   ui: ReactElement,
   client?: QueryClient,
 ): RenderResult => {
+  // Create a new query client every render() to make it deterministic
   const queryClient = client ?? generateTestQueryClient();
   return render(
-    // Need MemoryRouter for <Link/>
+    // Need MemoryRouter to render <Link/> without error
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
     </MemoryRouter>,
@@ -38,14 +39,21 @@ export const renderWithQueryClient = (
 };
 
 // from https://tkdodo.eu/blog/testing-react-query#for-custom-hooks
-export const createQueryClientWrappe = () => {
+export const createQueryClientWrapper = () => {
+  // Create a new query client every renderHook() to make it deterministic
   const queryClient = generateTestQueryClient();
-
   return ({ children }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
+export const customRenderHook = (callback) => {
+  return renderHook(callback, {
+    wrapper: createQueryClientWrapper(),
+  });
+};
+
 export * from '@testing-library/react';
 
-export { renderWithQueryClient as render };
+export { customRender as render };
+export { customRenderHook as renderHook };
