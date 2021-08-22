@@ -24,27 +24,31 @@ export function queryErrorHandler(error: unknown): void {
   toast({ id, title, status: 'error', variant: 'subtle', isClosable: true });
 }
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      // Suppressing aggresive default refetch behavior
-      staleTime: 10 * 60 * 1000, // data is considered stale after 10 minutes (applies to queryClient.preFetch as well)
-      cacheTime: 15 * 60 * 1000, // cache data for 15 minutes, have to be greater than staleTime (applies to queryClient.preFetch as well)
-      retryOnMount: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
+export const generateQueryClient = (): QueryClient => {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        // Suppressing aggresive default refetch behavior
+        staleTime: 10 * 60 * 1000, // data is considered stale after 10 minutes (applies to queryClient.preFetch as well)
+        cacheTime: 15 * 60 * 1000, // cache data for 15 minutes, have to be greater than staleTime (applies to queryClient.preFetch as well)
+        retryOnMount: false,
+        refetchOnReconnect: false,
+        refetchOnWindowFocus: false,
 
-      // Handle all useQuery error in a centralized place
-      onError(error) {
-        queryErrorHandler(error);
+        // Handle all useQuery error in a centralized place
+        onError(error) {
+          queryErrorHandler(error);
+        },
+        // useErrorBoundary - Set this to true to throw errors in the render phase and propagated to the nearest error boundary
       },
-      // useErrorBoundary - Set this to true to throw errors in the render phase and propagated to the nearest error boundary
-    },
 
-    mutations: {
-      onError(error) {
-        queryErrorHandler(error);
+      mutations: {
+        onError(error) {
+          queryErrorHandler(error);
+        },
       },
     },
-  },
-});
+  });
+};
+
+export const queryClient = generateQueryClient();
